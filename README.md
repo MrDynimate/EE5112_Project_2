@@ -6,7 +6,7 @@ Our MATLAB project implements **STOMP (Stochastic Trajectory Optimization for Mo
 
 ## Project Structure
 
-### File path
+### 🗂️File path
 - `task1/` – ProgramCompletion and Collision-Free Path Planning.
 - `task2/` – PathPlanning for a Different Manipulator.
 - `task3/` – ForwardKinematics Based on PoE.
@@ -48,7 +48,7 @@ Our MATLAB project implements **STOMP (Stochastic Trajectory Optimization for Mo
 
 ---
 
-## How to Run
+## 👉🏻How to Run
 
 1. Open MATLAB and navigate to the project directory.
 2. Run `main.m` to execute the full STOMP path planning workflow.
