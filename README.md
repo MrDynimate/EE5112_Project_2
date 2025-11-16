@@ -1,54 +1,69 @@
-# TASK
-<span style="color:red">DDL：Submission deadline: Nov. 13th, 2025, 5:00pm.</span>
-尽量周六晚上完成大部分，周日做视频什么的
-## 1.完善示例代码
-#sys
+# EE5112 Group6 - STOMP Path Planning Project
 
-## 2.替换机器人模型
-#sys
-使用不同的机器人机械臂结构完成Task1中的类似功能
-## 3.PoE formula 
-#ljy
-使用自己编写或者GitHub寻找资源code替换原有库
+Our MATLAB project implements **STOMP (Stochastic Trajectory Optimization for Motion Planning)** for a frankaEmikaPanda robotic arm. It includes scripts for trajectory planning, collision avoidance, Boundary Constraints and visualization of robot motion in environments with obstacles.
 
-## 4.场景设计&避障
-#lyd
-设计一定的场景展示我们的机械臂运动功能，使用动画展示
-用STOMP算法去避障
+---
+
+## Project Structure
+
+### File path
+- `task1/` – ProgramCompletion and Collision-Free Path Planning.
+- `task2/` – PathPlanning for a Different Manipulator.
+- `task3/` – ForwardKinematics Based on PoE.
+- `task4/` – Collision Avoidance Scenario Design.
+- `task5/` – PathPlanningwithJointConstraints.
+- `Total/` - Contains all the code for the final task. Run the project from this folder.
+
+### Main Scripts
+- `main.m` – Main script to run the entire project.
+- `KINOVA_STOMP_Path_Planning.m` – Main STOMP path planning script.
+- `RunLiveScript.m` – Utility to run the live script version.
+
+### Robot and Environment Utilities
+- `InitialVisualizer.m` – Initialize scene visualization with frankaEmikaPanda robot.
+- `createCollisionBox.m` – Create obstacles in the environment.
+- `helperSTOMP.m` – STOMP functions for trajectory optimization.
+- `updateJointsWorldPosition.m` – Compute world positions of robot joints.
+
+### STOMP Core Functions
+- `stompDTheta.m` – STOMP delta-theta update.
+- `stompSamples.m` – Generate trajectory samples.
+- `stompTrajCost.m` – Compute trajectory cost.
+- `stompObstacleCost.m` – Compute obstacle cost.
+- `stompOrientationCost.m` – Compute end-effector orientation cost.
+- `stompUpdateTheta.m` – Update trajectory based on samples.
+- `stompUpdateProb.m` – Update probability of trajectories.
+- `stompRobotSphere.m` – Define robot spheres for collision approximation.
+
+### Collision & Distance Utilities
+- `getTransformPoE.m` – Compute forward kinematics using the PoE (Product of Exponentials) method.
+- `sEDT_3d.m` – Compute 3D Signed Euclidean Distance Transform for collision checking.
+
+### Visualization
+- `visual.m` – General visualization utilities.
+- `/video` – Folder containing generated video outputs of robot motion.
+
+### Testing
+- `test.m` – Test scripts for various functions and utilities.
+
+---
+
+## How to Run
+
+1. Open MATLAB and navigate to the project directory.
+2. Run `main.m` to execute the full STOMP path planning workflow.
+3. Optional: Use `RunLiveScript.m` to run the live script version `Path_Planning.mlx`.
+4. Visualization of robot motion and obstacles will be displayed during execution.
+
+---
+## Effect Demonstration
+![Robot Path Planning](Total/video/Output.gif)
+---
+
+## Dependencies
+
+- MATLAB R2020a or later.
+- Robotics System Toolbox.
+- Image Processing Toolbox for visualization utilities.
 
 
-
-## 5.约束条件
-#lyd
-添加给机械臂一定的限制条件（eg.水平端碗）
-限制1 or more关节角度
-
-### Todo：
- - [x] 设计桌面烤炉场景
- - [x] 定义初始姿态（从烤炉下面45°取烤盘）
- - [x] 定义目标姿态（在桌面45°放置烤盘）
- - [ ] 定义hand 水平 保持不变
- - [ ] 添加STOMP避障效果
- - [ ] 录制视频
-# Remarks
-以下为加分项：
-- ⭕️添加简易UI界面（🚧视时间情况）
-- ⭕️拓展STOMP算法（🚧视时间情况）
-- 修复原有bug
-- ……
-
-其他：
-- 可以预制讲解视频 (尽量预留充足时间，去制作视频)
-- 每个人都要讲解自己做的part
-- 所有人都到场
-# Submit
-- ✅Report -> PDF格式 用Overleaf协作编辑
-- ✅Code -> Matlab实时文件
-- ✅Markdown -> 说明文件（每位都多少写一点，既方便理解代码又方便最后整合）
-- ✅animation -> 展示机械臂运动过程
-- ⭕️PPT -> Pre
-- ⭕️视频
-
-# Presentation
-- E1-06-07 on Nov. 13th, Thursday
-- total 10min（7min pre & 3min Q&A）

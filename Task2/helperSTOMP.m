@@ -32,7 +32,7 @@ Rinv = inv(R);
 % The smoothing matrix M, normalized from Rinv by each column, no longer symmetric
 M = 1 / nDiscretize * Rinv ./ max(Rinv, [], 1); 
 % R inverse is normalized so that the exploration is controlled to have samples within the created voxel world
-Rinv = 2*Rinv/sum(sum(Rinv)); 
+Rinv = 1.5*Rinv/sum(sum(Rinv)); 
 
 
 %%
@@ -52,32 +52,32 @@ while abs(Qtheta - QthetaOld) > convergenceThreshold
     tic
     %% TODO: Complete the following code. The needed functions are already given or partially given in the folder.
     %% TODO: Sample noisy trajectories
-[theta_samples, ~] = stompSamples(nPaths, Rinv, theta);   % Eq.(9)
+[theta_samples, ~] = stompSamples(nPaths, Rinv, theta);   
 
 %% TODO: Calculate Local trajectory cost for each sampled trajectory
-Stheta = zeros(nPaths, nDiscretize);                      % K×N
+Stheta = zeros(nPaths, nDiscretize);                  
 for k = 1:nPaths
     [q_step, ~] = stompTrajCost(robot_struct, theta_samples{k}, R, voxel_world);
-    Stheta(k, :) = q_step;                                % 1×N
+    Stheta(k, :) = q_step;                            
 end
 
 Stheta = (Stheta - min(Stheta,[],1)) ./ (max(Stheta,[],1) - min(Stheta,[],1) + eps);
 
 %% TODO: Given the local traj cost, update local trajectory probability
 h = 25;  % 10~30 
-Smin = min(Stheta, [], 1);                       % 1×N
-Smax = max(Stheta, [], 1);                       % 1×N
-den  = (Smax - Smin) + eps;                      % 1×N
-W    = exp( -h * (Stheta - Smin) ./ den );       % K×N
+Smin = min(Stheta, [], 1);                       
+Smax = max(Stheta, [], 1);                       
+den  = (Smax - Smin) + eps;                      
+W    = exp( -h * (Stheta - Smin) ./ den );       
 
-[~, bestIdx] = min(Stheta, [], 1);               % 1×N
+[~, bestIdx] = min(Stheta, [], 1);               
 for i = 1:nDiscretize
     W(bestIdx(i), i) = W(bestIdx(i), i) * 1.1;
 end
-P = W ./ sum(W, 1);                             
+P = W ./ sum(W, 1);                               
 
 %% TODO: Compute delta theta (aka gradient estimator)
-dtheta = zeros(size(theta));                      % J×N
+dtheta = zeros(size(theta));                    
 for i = 1:nDiscretize
     acc = zeros(numJoints,1);
     for k = 1:nPaths
@@ -86,11 +86,9 @@ for i = 1:nDiscretize
     dtheta(:,i) = acc;
 end
 
-% 只对中间列平滑（Eq.11）
 dtheta_smoothed = zeros(size(dtheta));
 dtheta_smoothed(:, 2:end-1) = (M * dtheta(:, 2:end-1)')';
 
-% 更新 + 固定首尾
 theta = theta + dtheta_smoothed;
 theta(:,1)   = q0;
 theta(:,end) = qT;
@@ -148,10 +146,26 @@ for i = 1:nDiscretize
 end
 % Display whether there is collision:
 isTrajectoryInCollision = any(inCollision)
+%% ===== Collision Tolerance Check =====
+disp('Performing collision tolerance check...');
+
+tol = 0.01;  % Allow distances smaller than 1 cm to be considered non-collision
+[minDist, idxMin] = min(sepDist);
+
+if minDist < -tol
+    disp('True penetration detected! Trajectory adjustment required.');
+elseif minDist < tol
+    disp('Contact or very close distance detected — considered non-collision.');
+else
+    disp('Completely safe.');
+end
+fprintf('Minimum separation distance: %.4f m\n', minDist);
 
 
 %% Record the whole training/learning process in video file
-enableVideoTraining = 1;
+enableVideoTraining = 0;
+
+
 
 v = VideoWriter('KinvaGen3_Training.avi');
 v.FrameRate = 15;
@@ -162,22 +176,25 @@ htext = text(-0.2,0.6,0.7,'Iteration = 0','HorizontalAlignment','left','FontSize
 if enableVideoTraining == 1
     theta_animation_tmp = theta_animation(~cellfun('isempty',theta_animation));
     nTraining = length(theta_animation_tmp);
-
-    % 使用安全索引，保证不会超出范围
-    for idx = 1:5:nTraining
-        UpdatedText = ['Iteration = ',num2str(idx)];
+    for k=0:5:nTraining
+        
+        UpdatedText = ['Iteration = ',num2str(k)];
         set(htext,'String',UpdatedText)
-        theta_tmp = theta_animation_tmp{idx};
+        theta_tmp = theta_animation_tmp{k+1};
 
         for t=1:size(theta_tmp,2)
             show(robot, theta_tmp(:,t),'PreservePlot', false, 'Frames', 'on');
+            %             drawnow;
             frame = getframe(gcf);
             writeVideo(v,frame);
+%             pause(1/15);
+            %     pause;
         end
         pause(1/15);
     end
 end
 close(v);
+
 
 
 %% Record planned trajectory to video files

@@ -32,35 +32,18 @@ for i = 2 : nDiscretize
     vel = vecnorm(sphere_centers_prev - sphere_centers,2,2);
     qo_cost(i) = stompObstacleCost(sphere_centers,radi, voxel_world, vel);
     
-    %% Add end-effector orientation constraint (hand horizontal as defined)
-    endEffectorName = 'panda_hand';  % 替换为你的末端执行器名称
-    
-    % --- Convert current column of theta to structure for getTransform ---
-    configStruct = homeConfiguration(robot_struct);
-    for j = 1:length(configStruct)
-        configStruct(j).JointPosition = theta(j,i);
-    end
-    
-    % --- Get end-effector transform ---
-    T = getTransformPoE(robot_struct, configStruct, endEffectorName);
-    R_ee = T(1:3,1:3);         % 末端旋转矩阵
-    x_hand = R_ee(:,1);        % hand x轴
-    z_hand = R_ee(:,3);        % hand z轴
-    
-    % --- Desired directions in base/world frame ---
-    x_target = [0;0;-1];       % hand x 指向 base z 负方向
-    z_target = [1;0;0];        % hand z 指向 base x 方向
-    
-    % --- Compute orientation cost ---
-    w_ori = 5;                  % 姿态约束权重，可调
-    qc_cost(i) = w_ori * (norm(x_hand - x_target,1) + norm(z_hand - z_target,1));  % L1范数惩罚
+    %% TODO: Define your qc_cost to add constraint on the end-effector
+    qc_cost = 0;
 end
 
 %% Local trajectory cost: you need to specify the relative weights between different costs
-Stheta = 5000*qo_cost + 100*qc_cost;
+Stheta = 1000*qo_cost + qc_cost;
 
 % sum over time and add the smoothness cost
 theta = theta(:, 2:end-1);
 Qtheta = sum(Stheta) + 1/2 * sum(theta * R * theta', "all");
 
 end
+
+
+    
